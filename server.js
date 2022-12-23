@@ -2,50 +2,83 @@ import { ApolloServer, gql } from 'apollo-server';
 
 const typeDefs = gql`
   type Query {
-    allMovies: [Movie!]!
-    movie(id: String!): Movie
+    tickers: [Ticker]!
+    ticker(id: String!): Ticker
+    coins: [Coin]
+    coin(id: String!): Coin
   }
-  type Movie {
-    id: Int
-    url: String
-    imdb_code: String
-    title: String
-    title_english: String
-    title_long: String
-    slug: String
-    year: Int
-    rating: Float
-    runtime: Int
-    genres: [String]
-    summary: String
-    description_full: String
-    synopsis: String
-    yt_trailer_code: String
-    language: String
-    mpa_rating: String
-    background_image: String
-    background_image_original: String
-    small_cover_image: String
-    medium_cover_image: String
-    large_cover_image: String
-    state: String
-    torrents: [String]
-    date_uploaded: String
-    date_uploaded_unix: Int
+  type Ticker {
+    id: String
+    name: String
+    symbol: String
+    rank: Int
+    circulating_supply: Int
+    total_supply: Int
+    max_supply: Int
+    beta_value: Float
+    first_data_at: String
+    last_updated: String
+  }
+  type Ticker {
+    id: String
+    name: String
+    symbol: String
+    rank: Int
+    circulating_supply: Int
+    total_supply: Int
+    max_supply: Int
+    beta_value: Float
+    first_data_at: String
+    last_updated: String
+    Quote(key: String): [Quote]
+  }
+  type Quote {
+    price: Float
+    volume_24h: Float
+    volume_24h_change_24h: Float
+    market_cap: Int
+    market_cap_change_24h: Float
+    percent_change_15m: Float
+    percent_change_30m: Float
+    percent_change_1h: Float
+    percent_change_6h: Float
+    percent_change_12h: Float
+    percent_change_24h: Float
+    percent_change_7d: Float
+    percent_change_30d: Float
+    percent_change_1y: Float
+    ath_price: Float
+    ath_date: String
+    percent_from_price_ath: Float
+  }
+  type Coin {
+    id: String
+    name: String
+    symbol: String
+    rank: Int
+    is_new: Boolean
+    is_active: Boolean
+    type: String
   }
 `;
 
 const resolvers = {
   Query: {
-    allMovies() {
-      return fetch('https://yts.mx/api/v2/list_movies.json')
+    tickers() {
+      return fetch('https://api.coinpaprika.com/v1//ticker')
         .then(res => res.json())
-        .then(json => json.data.movies);
+        .then(json => json.slice(0, 100));
     },
-    movie(_, { id }) {
-      return fetch(`https://yts.mx/api/v2/movie_details.json?movie_id=${id}`)
+    ticker(_, { id }) {
+      return fetch(`https://api.coinpaprika.com/v1//tickers/${id}`).then(res => res.json());
+    },
+    coins() {
+      return fetch('https://api.coinpaprika.com/v1//coins')
         .then(res => res.json())
-        .then(json => json.data.movie);
+        .then(json => json.slice(0, 100));
+    },
+    coin(_, { id }) {
+      return fetch(`https://api.coinpaprika.com/v1//coins/${id}`).then(res => res.json());
     },
   },
 };
